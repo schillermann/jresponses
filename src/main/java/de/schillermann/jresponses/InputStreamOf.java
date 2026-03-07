@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 public final class InputStreamOf extends InputStream {
   private final InputStream origin;
@@ -14,7 +13,7 @@ public final class InputStreamOf extends InputStream {
   }
 
   public InputStreamOf(String text) {
-    this(text, StandardCharsets.UTF_8);
+    this(text, Charset.defaultCharset());
   }
 
   public InputStreamOf(byte[] bytes) {

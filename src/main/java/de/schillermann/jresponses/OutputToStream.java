@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 public final class OutputToStream implements Output {
   private final Source<OutputStream> out;
@@ -15,7 +15,7 @@ public final class OutputToStream implements Output {
 
   public void print(String text) {
     try {
-      this.out.value().write(text.getBytes(StandardCharsets.UTF_8));
+      this.out.value().write(text.getBytes(Charset.defaultCharset()));
     } catch (IOException ex) {
       throw new UncheckedIOException("Failed to write text output", ex);
     }

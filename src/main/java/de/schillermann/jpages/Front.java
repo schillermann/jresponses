@@ -13,19 +13,13 @@ public final class Front {
     this.port = port;
   }
 
-  public void listen() {
+  public void listen() throws IOException {
     try (final ServerSocket server = new ServerSocket(this.port)) {
       while (!Thread.currentThread().isInterrupted()) {
         try (final Socket socket = server.accept()) {
           this.session.dispatch(socket);
-        } catch (IOException ex) {
-          throw new IllegalStateException(
-              String.format("Failed to accept a connection on port %d", this.port), ex);
         }
       }
-    } catch (IOException ex) {
-      throw new IllegalStateException(
-          String.format("Failed to open server socket on port %d", this.port), ex);
     }
   }
 }

@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'de.schillermann.jpages'
+group = 'de.schillermann.jresponses'
 version = '0.1.0'
 
 publishing {

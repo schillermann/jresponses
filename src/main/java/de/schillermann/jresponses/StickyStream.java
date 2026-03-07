@@ -1,4 +1,4 @@
-package de.schillermann.jpages;
+package de.schillermann.jresponses;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -3,15 +3,15 @@ package de.schillermann.jresponses;
 import java.io.InputStream;
 
 public final class RequestFromStream implements Request {
-  private final Source<InputStream> source;
+  private final Cursor source;
 
-  public RequestFromStream(Source<InputStream> stream) {
-    this.source = stream;
+  public RequestFromStream(Cursor input) {
+    this.source = input;
   }
 
   @Override
   public Header header(String name) {
-    return new HeaderFromStream(this.source, name);
+    return new HeaderFromCursor(this.source, name);
   }
 
   @Override

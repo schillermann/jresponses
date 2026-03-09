@@ -4,37 +4,44 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public final class OnlyBodyStream extends InputStream {
-  private final Source<InputStream> origin;
-  private boolean found = false;
+  private final Cursor cursor;
+  private final Source<Long> source;
+  private long length;
+  private long count;
+  private boolean initialized;
 
-  public OnlyBodyStream(Source<InputStream> stream) {
-    this.origin = stream;
+  public OnlyBodyStream(final Cursor body) {
+    this(
+        new BodyCursor(body),
+        new StickySource<>(new ContentLengthHeader(body)));
+  }
+
+  public OnlyBodyStream(final Cursor body, final Source<Long> len) {
+    this.cursor = body;
+    this.source = len;
+    this.length = -1L;
+    this.count = 0L;
+    this.initialized = false;
   }
 
   @Override
   public int read() throws IOException {
-    if (!this.found) {
-      this.skipHeaders();
-      this.found = true;
+    if (!this.initialized) {
+      this.length = this.source.value();
+      this.initialized = true;
     }
-    return this.origin.value().read();
-  }
-
-  private void skipHeaders() throws IOException {
-    int state = 0; // State machine to track \r\n\r\n
-    while (state < 4) {
-      int b = this.origin.value().read();
-      if (b == -1)
-        break;
-
-      // HTTP boundary is specifically: 13, 10, 13, 10 (\r\n\r\n)
-      if ((state == 0 || state == 2) && b == '\r') {
-        state++;
-      } else if ((state == 1 || state == 3) && b == '\n') {
-        state++;
-      } else {
-        state = (b == '\r') ? 1 : 0;
+    final int result;
+    if (this.length >= 0 && this.count >= this.length) {
+      result = -1;
+    } else if (this.cursor.exists()) {
+      result = this.cursor.current();
+      this.count++;
+      if (this.length < 0 || this.count < this.length) {
+        this.cursor.next();
       }
+    } else {
+      result = -1;
     }
+    return result;
   }
 }

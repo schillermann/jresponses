@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public final class CursorFromStream implements Cursor {
-  private final Source<InputStream> source;
+  private final Scalar<InputStream> source;
   private int head;
 
-  public CursorFromStream(Source<InputStream> src) {
+  public CursorFromStream(Scalar<InputStream> src) {
     this.source = src;
     this.head = -2;
   }

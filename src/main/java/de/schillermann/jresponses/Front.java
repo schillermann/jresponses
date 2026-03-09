@@ -15,11 +15,22 @@ public final class Front {
 
   public void listen() throws IOException {
     try (final ServerSocket server = new ServerSocket(this.port)) {
-      while (!Thread.currentThread().isInterrupted()) {
-        try (final Socket socket = server.accept()) {
-          this.session.dispatch(socket);
+      new While(
+        new Scalar<Boolean>() {
+          @Override
+          public Boolean value() throws IOException {
+            return !Thread.currentThread().isInterrupted();
+          }
+        },
+        new While.Action() {
+          @Override
+          public void apply() throws IOException {
+            try (final Socket socket = server.accept()) {
+              Front.this.session.dispatch(socket);
+            }
+          }
         }
-      }
+      ).value();
     }
   }
 }

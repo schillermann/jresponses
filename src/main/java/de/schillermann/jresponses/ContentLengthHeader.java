@@ -2,7 +2,7 @@ package de.schillermann.jresponses;
 
 import java.io.IOException;
 
-public final class ContentLengthHeader implements Source<Long> {
+public final class ContentLengthHeader implements Scalar<Long> {
   private final Cursor cursor;
 
   public ContentLengthHeader(final Cursor body) {

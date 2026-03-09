@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 public final class OnlyBodyStream extends InputStream {
   private final Cursor cursor;
-  private final Source<Long> source;
+  private final Scalar<Long> source;
   private long length;
   private long count;
   private boolean initialized;
@@ -13,10 +13,10 @@ public final class OnlyBodyStream extends InputStream {
   public OnlyBodyStream(final Cursor body) {
     this(
         new BodyCursor(body),
-        new StickySource<>(new ContentLengthHeader(body)));
+        new StickyScalar<>(new ContentLengthHeader(body)));
   }
 
-  public OnlyBodyStream(final Cursor body, final Source<Long> len) {
+  public OnlyBodyStream(final Cursor body, final Scalar<Long> len) {
     this.cursor = body;
     this.source = len;
     this.length = -1L;

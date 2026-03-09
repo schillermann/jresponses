@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public final class SocketOutput implements Source<OutputStream> {
+public final class SocketOutput implements Scalar<OutputStream> {
   private final Socket socket;
 
   public SocketOutput(Socket skt) {

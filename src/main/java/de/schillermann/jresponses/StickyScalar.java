@@ -2,12 +2,12 @@ package de.schillermann.jresponses;
 
 import java.io.IOException;
 
-public final class StickySource<T> implements Source<T> {
-  private final Source<T> origin;
+public final class StickyScalar<T> implements Scalar<T> {
+  private final Scalar<T> origin;
   private T cache;
   private boolean pushed;
 
-  public StickySource(Source<T> src) {
+  public StickyScalar(Scalar<T> src) {
     this.origin = src;
     this.pushed = false;
   }

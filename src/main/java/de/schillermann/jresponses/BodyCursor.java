@@ -4,11 +4,11 @@ import java.io.IOException;
 
 public final class BodyCursor implements Cursor {
   private final Cursor origin;
-  private Source<Boolean> reached;
+  private Scalar<Boolean> reached;
 
   public BodyCursor(final Cursor body) {
     this.origin = body;
-    this.reached = new StickySource<>(new HeaderBoundary(body));
+    this.reached = new StickyScalar<>(new HeaderBoundary(body));
   }
 
   @Override
@@ -32,6 +32,6 @@ public final class BodyCursor implements Cursor {
   @Override
   public void rewind() throws IOException {
     this.origin.rewind();
-    this.reached = new StickySource<>(new HeaderBoundary(this.origin));
+    this.reached = new StickyScalar<>(new HeaderBoundary(this.origin));
   }
 }

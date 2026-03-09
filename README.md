@@ -35,11 +35,7 @@ import java.net.Socket;
 public class MyWebServer {
     public static void main(String[] args) throws IOException {
         new Front(socket -> {
-            Request request = new RequestFromStream(
-                new StickyCursor(
-                    new CursorFromStream(
-                        new SocketInput(socket)),
-                    new MemoryInBytes()));
+            Request request = new RequestFromSocket(socket);
             
             Header agent = request.header("User-Agent");
             String body = new String(request.body().readAllBytes());

@@ -57,6 +57,24 @@ public class MyWebServer {
 }
 ```
 
+## Routing
+
+For more complex applications, you can use declarative routing with `ResponseForked` and `ForkPath`.
+This approach avoids procedural `if/else` logic:
+
+```java
+new Front(socket -> {
+    final Request request = new RequestFromSocket(socket);
+    new ResponseForked(
+        request,
+        new ResponseStatusLineNotFound(new ResponseBody("Page Not Found!")),
+        new ForkPath("/", new ResponseStatusLineOk(new ResponseBody("Hello World!"))),
+        new ForkPath("/balance", new ResponseStatusLineOk(new ResponseBody("42"))),
+        new ForkPath("/id", new ResponseStatusLineOk(new ResponseBody("mario")))
+    ).printTo(socket.getOutputStream());
+}, 8080).listen();
+```
+
 ## Installation
 
 Since this library is not yet published to Maven Central, you can install it into your local Maven repository:

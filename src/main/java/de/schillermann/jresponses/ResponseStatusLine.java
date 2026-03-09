@@ -3,16 +3,12 @@ package de.schillermann.jresponses;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public final class ResponseStatus implements Response {
+public final class ResponseStatusLine implements Response {
   private final Response origin;
   private final int code;
   private final String message;
 
-  public ResponseStatus(Response page) {
-    this(page, 200, "OK");
-  }
-
-  public ResponseStatus(Response page, int code, String msg) {
+  public ResponseStatusLine(Response page, int code, String msg) {
     this.origin = page;
     this.code = code;
     this.message = msg;

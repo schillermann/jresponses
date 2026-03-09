@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RequestReadTest {
   @Test
@@ -63,5 +64,22 @@ class RequestReadTest {
     t.join();
 
     assertTrue(wasFinished, "Reading the body should not hang!");
+  }
+
+  @Test
+  void requestLineReturnsText() throws IOException {
+    final String data = "GET /path?query HTTP/1.1\r\n\r\n";
+    final Cursor cursor = new Cursor() {
+      private int pos = 0;
+      @Override public int current() { return pos < data.length() ? data.charAt(pos) : -1; }
+      @Override public void next() { pos++; }
+      @Override public boolean exists() { return pos < data.length(); }
+      @Override public void rewind() { pos = 0; }
+    };
+    final RequestLine line = new RequestLineFromCursor(cursor);
+    assertEquals("GET", line.method().string());
+    assertEquals("/path", line.path().string());
+    assertEquals("query", line.query().string());
+    assertEquals("HTTP/1.1", line.protocol().string());
   }
 }

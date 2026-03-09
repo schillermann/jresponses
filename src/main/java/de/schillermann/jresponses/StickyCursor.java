@@ -37,6 +37,7 @@ public final class StickyCursor implements Cursor {
     return this.position < this.memory.size() || this.origin.exists();
   }
 
+  @Override
   public void rewind() {
     this.position = 0;
   }

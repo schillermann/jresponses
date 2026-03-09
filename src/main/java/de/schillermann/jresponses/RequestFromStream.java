@@ -10,6 +10,11 @@ public final class RequestFromStream implements Request {
   }
 
   @Override
+  public RequestLine requestLine() {
+    return new RequestLineFromCursor(this.source);
+  }
+
+  @Override
   public Header header(String name) {
     return new HeaderFromCursor(this.source, name);
   }

@@ -32,6 +32,11 @@ public final class RequestFromSocket implements Request {
   }
 
   @Override
+  public RequestLine requestLine() {
+    return this.origin.requestLine();
+  }
+
+  @Override
   public Header header(final String name) {
     return this.origin.header(name);
   }

@@ -14,11 +14,10 @@ import java.net.Socket;
 public class MyWebServer {
     public static void main(String[] args) throws IOException {
         new Front(socket -> {
-            new ResponseStatus(
+            new ResponseStatusLineOk(
                 new ResponseHeader(
-                    new ResponseBody("<h1>Hello from JPages!</h1>"),
-                    "Content-Type", "text/html"),
-                200, "OK")
+                    new ResponseBody("<h1>Hello from JResponses!</h1>"),
+                    "Content-Type", "text/html"))
                 .printTo(socket.getOutputStream());
         }, 8080).listen();
     }
@@ -42,15 +41,14 @@ public class MyWebServer {
             Header agent = request.header("User-Agent");
             String body = new String(request.body().readAllBytes());
 
-            new ResponseStatus(
+            new ResponseStatusLineOk(
                 new ResponseHeader(
                     new ResponseBody(
                         String.format(
                             "<html><body><h1>Your Browser: %s</h1><p>Body: %s</p></body></html>",
                             agent.exists() ? agent.string() : "Unknown",
                             body)),
-                    "Content-Type", "text/html"),
-                200, "OK")
+                    "Content-Type", "text/html"))
                 .printTo(socket.getOutputStream());
         }, 8080).listen();
     }
@@ -73,6 +71,84 @@ new Front(socket -> {
         new ForkPath("/id", new ResponseStatusLineOk(new ResponseBody("mario")))
     ).printTo(socket.getOutputStream());
 }, 8080).listen();
+```
+
+## Composition over Conditionals
+
+Instead of using procedural `if/else` logic in your request handlers, you should build your responses by composing specialized objects. Every component of an HTTP response—status, headers, and body—is an implementation of the `Response` interface.
+
+Here is an example of how you can create custom response components that adapt their behavior based on the user's authentication status:
+
+```java
+// Custom status line based on authentication
+public final class UserStatusLine implements Response {
+    private final Response origin;
+    private final boolean authenticated;
+
+    public UserStatusLine(Response origin, boolean authenticated) {
+        this.origin = origin;
+        this.authenticated = authenticated;
+    }
+
+    @Override
+    public void printTo(OutputStream out) throws IOException {
+        final int code = this.authenticated ? 200 : 401;
+        final String msg = this.authenticated ? "OK" : "Unauthorized";
+        new ResponseStatusLine(this.origin, code, msg).printTo(out);
+    }
+}
+
+// Custom header based on user name
+public final class UserHeader implements Response {
+    private final Response origin;
+    private final String name;
+
+    public UserHeader(Response origin, String user) {
+        this.origin = origin;
+        this.name = user;
+    }
+
+    @Override
+    public void printTo(OutputStream out) throws IOException {
+        if (!this.name.isEmpty()) {
+            new ResponseHeader(this.origin, "X-Logged-In-As", this.name).printTo(out);
+        } else {
+            this.origin.printTo(out);
+        }
+    }
+}
+
+// Custom body based on authentication
+public final class UserBody implements Response {
+    private final String name;
+
+    public UserBody(String user) {
+        this.name = user;
+    }
+
+    @Override
+    public void printTo(OutputStream out) throws IOException {
+        final String message = this.name.isEmpty() 
+            ? "Please, log in." 
+            : String.format("Welcome, %s!", this.name);
+        new ResponseBody(message).printTo(out);
+    }
+}
+```
+
+Then you can use them together to build a complete response:
+
+```java
+final String user = "mario"; // or empty if not logged in
+final boolean authenticated = !user.isEmpty();
+
+new UserStatusLine(
+    new UserHeader(
+        new UserBody(user),
+        user
+    ),
+    authenticated
+).printTo(socket.getOutputStream());
 ```
 
 ## Installation

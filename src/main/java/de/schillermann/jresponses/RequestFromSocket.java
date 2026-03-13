@@ -10,10 +10,6 @@ public final class RequestFromSocket implements Request {
 
   private final Request origin;
 
-  /**
-   * Ctor.
-   * @param socket The socket to read from
-   */
   public RequestFromSocket(final Socket socket) {
     this(
         new RequestFromStream(
@@ -23,12 +19,8 @@ public final class RequestFromSocket implements Request {
                 new MemoryInBytes())));
   }
 
-  /**
-   * Ctor.
-   * @param request The request origin
-   */
-  private RequestFromSocket(final Request request) {
-    this.origin = request;
+  public RequestFromSocket(final Request origin) {
+    this.origin = origin;
   }
 
   @Override

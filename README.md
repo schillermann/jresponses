@@ -24,51 +24,66 @@ public class MyWebServer {
 }
 ```
 
-## Handling Requests
+## Request
 
-To read request headers and the body, you can use the `Request` interface:
+To read request headers and the body, you can use the `Request` interface and its decorators:
 
 ```java
 import de.schillermann.jresponses.*;
 import java.io.IOException;
 import java.net.Socket;
 
-public class MyWebServer {
-    public static void main(String[] args) throws IOException {
-        new Front(socket -> {
-            Request request = new RequestFromSocket(socket);
-            
-            Header agent = request.header("User-Agent");
-            String body = new String(request.body().readAllBytes());
+new Front(socket -> {
+    Request request = new RequestFromSocket(socket);
+    
+    Header agent = request.header("User-Agent");
+    String body = new RequestBodyText(request).value();
 
-            new ResponseStatusLineOk(
-                new ResponseHeader(
-                    new ResponseBody(
-                        new FormattedText(
-                            "<html><body><h1>Your Browser: %s</h1><p>Body: %s</p></body></html>",
-                            agent.exists() ? agent.string() : "Unknown",
-                            body)),
-                    "Content-Type", "text/html"))
-                .printTo(socket.getOutputStream());
-        }, 8080).listen();
-    }
-}
+    new ResponseStatusLineOk(
+        new ResponseHeader(
+            new ResponseBody(
+                new FormattedText(
+                    "<html><body><h1>Your Browser: %s</h1><p>Body: %s</p></body></html>",
+                    agent.exists() ? agent.string() : "Unknown",
+                    body)),
+            "Content-Type", "text/html"))
+        .printTo(socket.getOutputStream());
+}, 8080).listen();
 ```
 
-## Working with JSON
+### Body Decorators
 
-To read a JSON body from a request in an elegant way, you can use the `TextOfJson` decorator:
+To read the request body in an elegant, declarative way, you can use specialized decorators:
+
+#### Plain Text
+Use `RequestBodyText` to get the body as a `String`:
 
 ```java
 import de.schillermann.jresponses.*;
-import java.io.IOException;
 
 new Front(socket -> {
     Request request = new RequestFromSocket(socket);
-    Text name = new TextOfJson(
-        new RequestBodyJson(request),
-        "name"
-    );
+    String body = new RequestBodyText(request).value();
+
+    new ResponseStatusLineOk(
+        new ResponseBody(
+            new FormattedText("You sent: %s", body)
+        )
+    ).printTo(socket.getOutputStream());
+}, 8080).listen();
+```
+
+#### JSON
+Use `RequestBodyJson` to parse the body as a `JsonObject`:
+
+```java
+import de.schillermann.jresponses.*;
+import jakarta.json.JsonObject;
+
+new Front(socket -> {
+    Request request = new RequestFromSocket(socket);
+    JsonObject json = new RequestBodyJson(request).value();
+    String name = json.getString("name");
 
     new ResponseStatusLineOk(
         new ResponseBody(

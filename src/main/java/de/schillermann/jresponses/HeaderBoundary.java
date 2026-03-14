@@ -2,6 +2,9 @@ package de.schillermann.jresponses;
 
 import java.io.IOException;
 
+/**
+ * Reaches the boundary of the header section (\r\n\r\n).
+ */
 public final class HeaderBoundary implements Scalar<Boolean> {
   private final Cursor cursor;
 
@@ -11,44 +14,7 @@ public final class HeaderBoundary implements Scalar<Boolean> {
 
   @Override
   public Boolean value() throws IOException {
-    this.reach();
-    return true;
-  }
-
-  public void reach() throws IOException {
     this.cursor.rewind();
-    final class State {
-      private int current = 0;
-
-      void update(final int b) {
-        if ((this.current == 0 || this.current == 2) && b == '\r') {
-          this.current++;
-        } else if ((this.current == 1 || this.current == 3) && b == '\n') {
-          this.current++;
-        } else {
-          this.current = (b == '\r') ? 1 : 0;
-        }
-      }
-
-      boolean finished() {
-        return this.current >= 4;
-      }
-    }
-    final State state = new State();
-    new Cycle(
-        new Limit() {
-          @Override
-          public boolean value() throws IOException {
-            return HeaderBoundary.this.cursor.exists() && !state.finished();
-          }
-        },
-        new Step() {
-          @Override
-          public Object value() throws IOException {
-            state.update(HeaderBoundary.this.cursor.current());
-            HeaderBoundary.this.cursor.next();
-            return this;
-          }
-        }).value();
+    return new BoundaryReached(this.cursor, new SeekingFirstCR()).value();
   }
 }

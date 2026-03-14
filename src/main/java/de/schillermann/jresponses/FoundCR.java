@@ -9,7 +9,7 @@ public final class FoundCR implements BoundaryState {
     if (b == '\n') {
       return new FoundCRLF();
     }
-    return b == '\r' ? this : new SeekingCR();
+    return b == '\r' ? this : new FirstCR();
   }
 
   @Override

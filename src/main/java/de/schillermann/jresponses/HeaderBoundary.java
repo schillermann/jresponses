@@ -15,6 +15,6 @@ public final class HeaderBoundary implements Scalar<Boolean> {
   @Override
   public Boolean value() throws IOException {
     this.cursor.rewind();
-    return new BoundaryReached(this.cursor, new SeekingFirstCR()).value();
+    return new BoundaryReached(this.cursor, new FirstCR()).value();
   }
 }

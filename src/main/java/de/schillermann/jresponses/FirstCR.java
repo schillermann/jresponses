@@ -3,7 +3,7 @@ package de.schillermann.jresponses;
 /**
  * Looking for the first CR.
  */
-public final class SeekingFirstCR implements BoundaryState {
+public final class FirstCR implements BoundaryState {
   @Override
   public BoundaryState next(final int b) {
     return b == '\r' ? new FoundCR() : this;

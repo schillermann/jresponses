@@ -6,7 +6,7 @@ package de.schillermann.jresponses;
 public final class FoundCRLF implements BoundaryState {
   @Override
   public BoundaryState next(final int b) {
-    return b == '\r' ? new FoundCRLFCR() : new SeekingCR();
+    return b == '\r' ? new FoundCRLFCR() : new FirstCR();
   }
 
   @Override

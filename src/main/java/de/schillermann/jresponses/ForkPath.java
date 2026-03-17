@@ -1,7 +1,6 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * Matches a specific request path.
@@ -29,13 +28,11 @@ public final class ForkPath implements Fork {
   }
 
   @Override
-  public Optional<Response> route(final Request req) throws IOException {
-    final Optional<Response> result;
-    if (this.path.equals(req.requestLine().path().string())) {
-      result = Optional.of(this.response);
-    } else {
-      result = Optional.empty();
-    }
-    return result;
+  public Response response(final Request req, final Response fallback) throws IOException {
+    return new ChoiceResponse(
+      new Equality(this.path, req.requestLine().path().string()),
+      this.response,
+      fallback
+    );
   }
 }

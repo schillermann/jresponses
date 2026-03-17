@@ -1,18 +1,18 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * A logical branch in routing.
  */
 public interface Fork {
   /**
-   * Route the request to a response.
+   * Response from the fork.
    * 
    * @param request The incoming request
-   * @return The response if matched, or empty if not
+   * @param fallback The response if not matched
+   * @return The response
    * @throws IOException If something goes wrong
    */
-  Optional<Response> route(Request request) throws IOException;
+  Response response(Request request, Response fallback) throws IOException;
 }

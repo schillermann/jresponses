@@ -1,11 +1,7 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
-/**
- * A response determined by a choice.
- */
 public final class ChoiceResponse implements Response {
   private final Scalar<Choice> choice;
   private final Response success;
@@ -18,7 +14,7 @@ public final class ChoiceResponse implements Response {
   }
 
   @Override
-  public void printTo(final OutputStream out) throws IOException {
-    this.choice.value().outcome(this.success, this.failure).printTo(out);
+  public Media media(final Media media) throws IOException {
+    return this.choice.value().outcome(this.success, this.failure).media(media);
   }
 }

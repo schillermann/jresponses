@@ -1,7 +1,6 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 
 /**
@@ -24,15 +23,14 @@ public final class ResponseForked implements Response {
   }
 
   @Override
-  public void printTo(final OutputStream out) throws IOException {
-    new LazyResponse(
-      new Scalar<Response>() {
-        @Override
-        public Response value() throws IOException {
-          return new ForksOf(ResponseForked.this.forks)
-            .response(ResponseForked.this.request, ResponseForked.this.fallback);
-        }
-      }
-    ).printTo(out);
+  public Media media(final Media media) throws IOException {
+    return new LazyResponse(
+        new Scalar<Response>() {
+          @Override
+          public Response value() throws IOException {
+            return new ForksOf(ResponseForked.this.forks)
+                .response(ResponseForked.this.request, ResponseForked.this.fallback);
+          }
+        }).media(media);
   }
 }

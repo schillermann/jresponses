@@ -9,9 +9,10 @@ Inspired by pure OOP, Alan Kay with [Smalltalk](https://en.wikipedia.org/wiki/Sm
   - [Body Decorators](#body-decorators)
 - [Routing](#routing)
 - [Concurrency & Configuration](#concurrency--configuration)
-- [Composition over Conditionals](#composition-over-conditionals)
 - [Installation](#installation)
 - [Design](#design)
+  - [Composition over Conditionals](#composition-over-conditionals)
+  - [Why Media?](#why-media)
 - [Localization & Encoding](#localization--encoding)
 
 ## Quick Start
@@ -31,7 +32,7 @@ public class MyWebServer {
                     new ResponseHeader(
                         new ResponseBody("<h1>Hello from JResponses!</h1>"),
                         "Content-Type", "text/html"))
-                    .printTo(socket.getOutputStream());
+                    .media(new WireMedia(new SocketOutput(socket)));
             }
         ).value();
     }
@@ -62,7 +63,7 @@ new WireFront(
                         agent.exists() ? agent.string() : "Unknown",
                         body)),
                 "Content-Type", "text/html"))
-            .printTo(socket.getOutputStream());
+            .media(new WireMedia(new SocketOutput(socket)));
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
@@ -88,7 +89,7 @@ new WireFront(
             new ResponseBody(
                 new FormattedText("You sent: %s", body)
             )
-        ).printTo(socket.getOutputStream());
+        ).media(new WireMedia(new SocketOutput(socket)));
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
@@ -112,7 +113,7 @@ new WireFront(
             new ResponseBody(
                 new FormattedText("Hello, %s!", name)
             )
-        ).printTo(socket.getOutputStream());
+        ).media(new WireMedia(new SocketOutput(socket)));
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
@@ -134,7 +135,7 @@ new WireFront(
             new ForkPath("/", new ResponseStatusLineOk(new ResponseBody("Hello World!"))),
             new ForkPath("/balance", new ResponseStatusLineOk(new ResponseBody("42"))),
             new ForkPath("/id", new ResponseStatusLineOk(new ResponseBody("mario")))
-        ).printTo(socket.getOutputStream());
+        ).media(new WireMedia(new SocketOutput(socket)));
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
@@ -170,10 +171,6 @@ If you don't provide any arguments, `WireFront` uses these defaults:
 new WireFront(session).value();
 ```
 
-## Composition over Conditionals
-
-Instead of using procedural `if/else` logic in your request handlers, you should build your responses by composing specialized objects. Every component of an HTTP response—status, headers, and body—is an implementation of the `Response` interface.
-
 ## Installation
 
 Since this library is not yet published to Maven Central, you can install it into your local Maven repository:
@@ -186,6 +183,41 @@ Since this library is not yet published to Maven Central, you can install it int
 
 JResponses is designed with composition in mind.
 Every part of an HTTP response (Status, Headers, Body) is a decorator that can be combined to build the final response output.
+
+### Composition over Conditionals
+
+Instead of using procedural `if/else` logic in your request handlers, you should build your responses by composing specialized objects. Every component of an HTTP response—status, headers, and body—is an implementation of the `Response` interface.
+
+### Why Media?
+
+In JResponses, you never see a naked `OutputStream`. This is by design.
+A raw stream is a data-hungry, procedural monster that forces you to manually format HTTP headers, manage byte arrays, and track stream states.
+That's not OOP, it's a script.
+
+Instead, we have `Media` and `WireMedia`.
+
+#### Encapsulation of OutputStream
+
+The `OutputStream` is encapsulated within `WireMedia`.
+This ensures that you don't "get" the stream to "write" to it.
+You don't ask the media for its internals, that would be a violation of its autonomy.
+Instead, the `Response` *acts* upon the `Media`.
+It tells the media: "Here is my status code," "Here is a header," and "Here is my body."
+
+The media knows how to format these into the HTTP protocol.
+By encapsulating the stream, we maintain **declarative integrity**.
+Your response objects don't know *how* to write to a socket, they only know *what* they are.
+
+#### Pushing Procedural Logic to the Margins
+
+In a well-designed object-oriented system, procedural logic—formatting strings, writing to streams, handling byte-level details—must be pushed to the very margins of the codebase.
+
+In JResponses, the "margin" is `WireMedia`.
+It's the only place where the raw HTTP protocol is constructed.
+The rest of your application remains a clean object-oriented, composable graph of objects.
+You build a response by nesting decorators, and only at the very last moment do you represent it through a medium.
+
+This approach keeps your business logic pure and your infrastructure separate.
 
 ## Localization & Encoding
 

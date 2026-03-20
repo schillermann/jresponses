@@ -1,8 +1,14 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 public interface Response {
-  void printTo(OutputStream out) throws IOException;
+  /**
+   * Represent this response in the media.
+   * 
+   * @param media The media
+   * @return The updated media
+   * @throws IOException If something goes wrong
+   */
+  Media media(Media media) throws IOException;
 }

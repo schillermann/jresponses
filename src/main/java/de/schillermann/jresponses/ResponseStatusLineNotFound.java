@@ -1,7 +1,6 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Response with 404 Not Found status line.
@@ -22,7 +21,7 @@ public final class ResponseStatusLineNotFound implements Response {
   }
 
   @Override
-  public void printTo(final OutputStream out) throws IOException {
-    this.origin.printTo(out);
+  public Media media(final Media media) throws IOException {
+    return this.origin.media(media);
   }
 }

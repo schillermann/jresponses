@@ -26,19 +26,20 @@ class ForksOfTest {
         @Override public InputStream body() { return null; }
     };
 
-    final Response fallback = (out) -> out.write("Fallback".getBytes());
-    final Response match = (out) -> out.write("Match".getBytes());
+    final Response fallback = (media) -> media.body(new InputStreamOf("Fallback"));
+    final Response match = (media) -> media.body(new InputStreamOf("Match"));
 
     final Forks forks = new ForksOf(Arrays.asList(
-        new ForkPath("/not-test", (out) -> out.write("No".getBytes())),
+        new ForkPath("/not-test", (media) -> media.body(new InputStreamOf("No"))),
         new ForkPath("/test", match)
     ));
 
     final Response res = forks.response(request, fallback);
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    res.printTo(out);
+    res.media(new WireMedia(() -> out));
 
-    assertEquals("Match", out.toString());
+    // WireMedia adds CRLF before body
+    assertEquals("\r\nMatch", out.toString());
   }
 
   @Test
@@ -56,30 +57,30 @@ class ForksOfTest {
         @Override public InputStream body() { return null; }
     };
 
-    final Response fallback = (out) -> out.write("Fallback".getBytes());
+    final Response fallback = (media) -> media.body(new InputStreamOf("Fallback"));
 
     final Forks forks = new ForksOf(Arrays.asList(
-        new ForkPath("/not-test", (out) -> out.write("No".getBytes()))
+        new ForkPath("/not-test", (media) -> media.body(new InputStreamOf("No")))
     ));
 
     final Response res = forks.response(request, fallback);
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    res.printTo(out);
+    res.media(new WireMedia(() -> out));
 
-    assertEquals("Fallback", out.toString());
+    assertEquals("\r\nFallback", out.toString());
   }
 
   @Test
   void testNoForks() throws IOException {
     final Request request = null; // NoRequest not needed if we don't access it
-    final Response fallback = (out) -> out.write("Fallback".getBytes());
+    final Response fallback = (media) -> media.body(new InputStreamOf("Fallback"));
 
     final Forks forks = new ForksOf(Collections.emptyList());
 
     final Response res = forks.response(request, fallback);
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    res.printTo(out);
+    res.media(new WireMedia(() -> out));
 
-    assertEquals("Fallback", out.toString());
+    assertEquals("\r\nFallback", out.toString());
   }
 }

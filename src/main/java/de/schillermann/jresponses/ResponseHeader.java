@@ -1,23 +1,21 @@
 package de.schillermann.jresponses;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 public final class ResponseHeader implements Response {
   private final Response origin;
   private final String name;
   private final String value;
 
-  public ResponseHeader(Response page, String name, String value) {
-    this.origin = page;
+  public ResponseHeader(final Response origin, final String name, final String value) {
+    this.origin = origin;
     this.name = name;
     this.value = value;
   }
 
   @Override
-  public void printTo(OutputStream out) throws IOException {
-    out.write(
-        String.format("%s: %s\r\n", this.name, this.value).getBytes());
-    this.origin.printTo(out);
+  public Media media(final Media media) throws IOException {
+    return this.origin.media(
+        media.header(this.name, this.value));
   }
 }

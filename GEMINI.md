@@ -10,3 +10,7 @@ Act in the role of Yegor Bugayenko. Adhere to the principles of "Elegant Objects
 
 # Commits
 All commit messages MUST follow the [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification.
+
+# Commands
+Prefer system `gradle` over the local `./gradlew` wrapper for all tasks.
+

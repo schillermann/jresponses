@@ -35,7 +35,7 @@ public class MyWebServer {
                         "Content-Type", "text/html"))
                     .media(new WireMedia(new SocketOutput(socket)));
             }
-        ).value();
+        ).conclusion();
     }
 }
 ```
@@ -68,7 +68,7 @@ new WireFront(
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
-).value();
+).conclusion();
 ```
 
 ### Body Decorators
@@ -94,7 +94,7 @@ new WireFront(
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
-).value();
+).conclusion();
 ```
 
 #### JSON
@@ -118,7 +118,7 @@ new WireFront(
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
-).value();
+).conclusion();
 ```
 
 ## Routing
@@ -140,8 +140,33 @@ new WireFront(
     },
     new ServerSocketOf(new Port(args)),
     new NumberOfConnections(args)
-).value();
+).conclusion();
 ```
+
+## Logging
+
+JResponses follows the OOP principle of decoration.
+JResponses follows the "Elegant Objects" principle of decoration. You can log the server lifecycle and connection activity by wrapping your objects with `LoggedFront` and `LoggedSession`:
+
+```java
+new LoggedFront(
+    new WireFront(
+        new LoggedSession(
+            socket -> {
+                // Your session logic here
+            }
+        ),
+        new ServerSocketOf(new Port(8080)),
+        new NumberOfConnections(4)
+    )
+).conclusion();
+```
+
+This separation follows the Single Responsibility Principle, allowing you to independently decorate the server's overall lifecycle `LoggedFront` and its individual connection events `LoggedSession`.
+
+- **`LoggedFront`**: Logs when the server starts and stops, including total uptime.
+- **`LoggedSession`**: Logs every incoming connection with the remote address.
+
 
 ## Concurrency & Configuration
 
@@ -160,7 +185,7 @@ public static void main(String[] args) throws IOException {
         session,
         new ServerSocketOf(new Port(args)),
         new NumberOfConnections(args)
-    ).value();
+    ).conclusion();
 }
 ```
 
@@ -169,7 +194,7 @@ If you don't provide any arguments, `WireFront` uses these defaults:
 - **Connections:** Available processors (minimum **4**)
 
 ```java
-new WireFront(session).value();
+new WireFront(session).conclusion();
 ```
 
 ## Installation

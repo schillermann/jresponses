@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 /**
  * Accept and dispatch connections from a server socket.
  */
-public final class Connections implements Scalar<Object> {
+public final class Connections implements Front {
   private final ServerSocket server;
   private final Session session;
   private final Scalar<Integer> threads;
@@ -33,27 +33,51 @@ public final class Connections implements Scalar<Object> {
     this.threads = thds;
   }
 
-  @Override
-  public Object value() throws IOException {
-    if (Thread.currentThread().isInterrupted()) {
+  /**
+   * Dispatched connections.
+   * @return The conclusion of the process
+   * @throws IOException If fails
+   */
+  public Object conclusion() throws IOException {
+    try {
+      this.exec = Executors.newFixedThreadPool(this.threads.value());
+    } catch (final Exception ex) {
+      if (Thread.currentThread().isInterrupted()) {
+        return new End();
+      }
+      throw new IOException(ex);
+    }
+    try {
+      while (!Thread.currentThread().isInterrupted()) {
+        final Socket socket;
+        try {
+          socket = this.server.accept();
+        } catch (final IOException ex) {
+          if (Thread.currentThread().isInterrupted()) {
+            return new End();
+          }
+          throw ex;
+        } catch (final Exception ex) {
+          if (Thread.currentThread().isInterrupted()) {
+            return new End();
+          }
+          throw new RuntimeException(ex);
+        }
+        this.exec.submit(
+          () -> {
+            try (socket) {
+              this.session.dispatch(socket);
+            } catch (final IOException ex) {
+              throw new IllegalStateException(ex);
+            }
+          }
+        );
+      }
+    } finally {
       if (this.exec != null) {
         this.exec.shutdown();
       }
-      return new End();
     }
-    if (this.exec == null) {
-      this.exec = Executors.newFixedThreadPool(this.threads.value());
-    }
-    final Socket socket = this.server.accept();
-    this.exec.submit(
-      () -> {
-        try (socket) {
-          this.session.dispatch(socket);
-        } catch (final IOException ex) {
-          throw new IllegalStateException(ex);
-        }
-      }
-    );
-    return this.value();
+    return new End();
   }
 }

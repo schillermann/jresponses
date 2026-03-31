@@ -38,9 +38,9 @@ public final class WireFront implements Front {
   }
 
   @Override
-  public Object value() throws IOException {
+  public Object conclusion() throws IOException {
     try (final ServerSocket server = this.socket.value()) {
-      return new Connections(server, this.session, this.threads).value();
+      return new Connections(server, this.session, this.threads).conclusion();
     }
   }
 }

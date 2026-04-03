@@ -3,59 +3,76 @@ package de.schillermann.jresponses;
 import java.io.IOException;
 
 public final class RequestLineFromCursor implements RequestLine {
-  private final Cursor cursor;
-  private String method;
-  private String path;
-  private String query;
-  private String protocol;
-  private boolean read;
+  private final Scalar<String[]> parts;
 
   public RequestLineFromCursor(final Cursor crsr) {
-    this.cursor = crsr;
-    this.read = false;
+    this.parts = new StickyScalar<>(
+      () -> {
+        crsr.rewind();
+        return new LineFromCursor(crsr).string().split(" ", 3);
+      }
+    );
   }
 
   @Override
   public Method method() throws IOException {
-    this.read();
-    return new MethodOf(this.method);
+    final String[] p = this.parts.value();
+    final String name;
+    if (p.length > 0) {
+      name = p[0];
+    } else {
+      name = "";
+    }
+    return new MethodOf(name);
   }
 
   @Override
   public Path path() throws IOException {
-    this.read();
-    return new PathOf(this.path);
+    final String[] p = this.parts.value();
+    final String full;
+    if (p.length > 1) {
+      full = p[1];
+    } else {
+      full = "";
+    }
+    final int idx = full.indexOf('?');
+    final String path;
+    if (idx == -1) {
+      path = full;
+    } else {
+      path = full.substring(0, idx);
+    }
+    return new PathOf(path);
   }
 
   @Override
   public Query query() throws IOException {
-    this.read();
-    return new QueryOf(this.query);
+    final String[] p = this.parts.value();
+    final String full;
+    if (p.length > 1) {
+      full = p[1];
+    } else {
+      full = "";
+    }
+    final int idx = full.indexOf('?');
+    final String query;
+    if (idx == -1) {
+      query = "";
+    } else {
+      query = full.substring(idx + 1);
+    }
+    return new QueryOf(query);
   }
 
   @Override
   public Protocol protocol() throws IOException {
-    this.read();
-    return new ProtocolOf(this.protocol);
-  }
-
-  private void read() throws IOException {
-    if (!this.read) {
-      this.cursor.rewind();
-      final String line = new LineFromCursor(this.cursor).string();
-      final String[] parts = line.split(" ", 3);
-      this.method = parts.length > 0 ? parts[0] : "";
-      final String fullPath = parts.length > 1 ? parts[1] : "";
-      final int idx = fullPath.indexOf('?');
-      if (idx == -1) {
-        this.path = fullPath;
-        this.query = "";
-      } else {
-        this.path = fullPath.substring(0, idx);
-        this.query = fullPath.substring(idx + 1);
-      }
-      this.protocol = parts.length > 2 ? parts[2] : "";
-      this.read = true;
+    final String[] p = this.parts.value();
+    final String name;
+    if (p.length > 2) {
+      name = p[2];
+    } else {
+      name = "";
     }
+    return new ProtocolOf(name);
   }
 }

@@ -2,6 +2,10 @@
 
 A simple, composable Java web framework built on raw sockets.
 
+You can also find similar web frameworks in other languages:
+- [PHPResponses](https://github.com/schillermann/phpresponses)
+- [JSResponses](https://github.com/schillermann/jsresponses)
+
 Inspired by pure OOP, Alan Kay with [Smalltalk](https://en.wikipedia.org/wiki/Smalltalk), and Yegor Bugayenko's [Cactoos](https://github.com/yegor256/cactoos), [Takes](https://github.com/yegor256/takes), and [JPages](https://github.com/yegor256/jpages).
 
 - [Quick Start](#quick-start)
